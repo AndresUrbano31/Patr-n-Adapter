@@ -1,173 +1,167 @@
 package com.adapter;
 
 import com.adapter.models.*;
-import javax.swing.*;
-import javax.swing.border.*;
-import java.awt.*;
+import javafx.application.Application;
+import javafx.geometry.*;
+import javafx.scene.*;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.*;
+import javafx.stage.Stage;
 
-public class Main {
+public class Main extends Application {
+
+    private TextArea output;
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> createWindow());
+        launch(args);
     }
 
-    static void createWindow() {
-        JFrame frame = new JFrame("Payment Gateway - Adapter & Bridge Pattern");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 700);
-        frame.setLocationRelativeTo(null);
-        frame.setLayout(new BorderLayout(10, 10));
+    @Override
+    public void start(Stage stage) {
+        stage.setTitle("Payment Gateway - Adapter & Bridge Pattern");
 
-        JLabel title = new JLabel("Payment Gateway System", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 22));
-        title.setForeground(new Color(33, 97, 140));
-        title.setBorder(new EmptyBorder(20, 0, 10, 0));
-        frame.add(title, BorderLayout.NORTH);
+        // Title
+        Label title = new Label("Payment Gateway System");
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+        title.setTextFill(Color.web("#21618C"));
 
-        JPanel form = new JPanel(new GridBagLayout());
-        form.setBorder(new EmptyBorder(10, 30, 10, 30));
-        GridBagConstraints g = new GridBagConstraints();
-        g.insets = new Insets(8, 8, 8, 8);
-        g.fill = GridBagConstraints.HORIZONTAL;
+        // Gateway selector
+        Label gatewayLabel = new Label("Select Gateway:");
+        ComboBox<String> gatewayBox = new ComboBox<>();
+        gatewayBox.getItems().addAll("Stripe", "PayPal");
+        gatewayBox.setValue("Stripe");
+        gatewayBox.setPrefWidth(200);
 
-        g.gridx = 0; g.gridy = 0;
-        form.add(new JLabel("Select Gateway:"), g);
-        g.gridx = 1;
-        JComboBox<String> gatewayBox = new JComboBox<>(new String[]{"Stripe", "PayPal"});
-        gatewayBox.setFont(new Font("Arial", Font.PLAIN, 14));
-        form.add(gatewayBox, g);
+        // Payment type
+        Label typeLabel = new Label("Payment Type:");
+        ComboBox<String> typeBox = new ComboBox<>();
+        typeBox.getItems().addAll("Standard", "With Discount");
+        typeBox.setValue("Standard");
+        typeBox.setPrefWidth(200);
 
-        g.gridx = 0; g.gridy = 1;
-        form.add(new JLabel("Payment Type:"), g);
-        g.gridx = 1;
-        JComboBox<String> typeBox = new JComboBox<>(new String[]{"Standard", "With Discount"});
-        typeBox.setFont(new Font("Arial", Font.PLAIN, 14));
-        form.add(typeBox, g);
+        // Amount
+        Label amountLabel = new Label("Amount ($):");
+        TextField amountField = new TextField("100.0");
+        amountField.setPrefWidth(200);
 
-        g.gridx = 0; g.gridy = 2;
-        form.add(new JLabel("Amount ($):"), g);
-        g.gridx = 1;
-        JTextField amountField = new JTextField("100.0");
-        amountField.setFont(new Font("Arial", Font.PLAIN, 14));
-        form.add(amountField, g);
-
-        g.gridx = 0; g.gridy = 3;
-        JLabel discountLabel = new JLabel("Discount (%):");
-        form.add(discountLabel, g);
-        g.gridx = 1;
-        JTextField discountField = new JTextField("10");
-        discountField.setFont(new Font("Arial", Font.PLAIN, 14));
-        form.add(discountField, g);
-
-        g.gridx = 0; g.gridy = 4;
-        JLabel accountLabel = new JLabel("PayPal Account:");
-        form.add(accountLabel, g);
-        g.gridx = 1;
-        JTextField accountField = new JTextField("customer@email.com");
-        accountField.setFont(new Font("Arial", Font.PLAIN, 14));
-        form.add(accountField, g);
-
-        accountLabel.setVisible(false);
-        accountField.setVisible(false);
+        // Discount
+        Label discountLabel = new Label("Discount (%):");
+        TextField discountField = new TextField("10");
+        discountField.setPrefWidth(200);
         discountLabel.setVisible(false);
         discountField.setVisible(false);
 
-        gatewayBox.addActionListener(e -> {
-            boolean isPayPal = gatewayBox.getSelectedItem().equals("PayPal");
+        // PayPal account
+        Label accountLabel = new Label("PayPal Account:");
+        TextField accountField = new TextField("customer@email.com");
+        accountField.setPrefWidth(200);
+        accountLabel.setVisible(false);
+        accountField.setVisible(false);
+
+        // Show/hide fields
+        gatewayBox.setOnAction(e -> {
+            boolean isPayPal = gatewayBox.getValue().equals("PayPal");
             accountLabel.setVisible(isPayPal);
             accountField.setVisible(isPayPal);
-            form.revalidate();
         });
 
-        typeBox.addActionListener(e -> {
-            boolean hasDiscount = typeBox.getSelectedItem().equals("With Discount");
+        typeBox.setOnAction(e -> {
+            boolean hasDiscount = typeBox.getValue().equals("With Discount");
             discountLabel.setVisible(hasDiscount);
             discountField.setVisible(hasDiscount);
-            form.revalidate();
         });
 
-        frame.add(form, BorderLayout.CENTER);
+        // Form grid
+        GridPane grid = new GridPane();
+        grid.setHgap(15);
+        grid.setVgap(15);
+        grid.setPadding(new Insets(20, 40, 20, 40));
+        grid.add(gatewayLabel,  0, 0); grid.add(gatewayBox,  1, 0);
+        grid.add(typeLabel,     0, 1); grid.add(typeBox,     1, 1);
+        grid.add(amountLabel,   0, 2); grid.add(amountField, 1, 2);
+        grid.add(discountLabel, 0, 3); grid.add(discountField,1, 3);
+        grid.add(accountLabel,  0, 4); grid.add(accountField, 1, 4);
 
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        // Buttons
+        Button payBtn = new Button("Process Payment");
+        payBtn.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white; " +
+                "-fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10 20;");
 
-        JButton payBtn = new JButton("Process Payment");
-        payBtn.setBackground(new Color(39, 174, 96));
-        payBtn.setForeground(Color.WHITE);
-        payBtn.setFont(new Font("Arial", Font.BOLD, 14));
-        payBtn.setFocusPainted(false);
+        Button refundBtn = new Button("Request Refund");
+        refundBtn.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white; " +
+                "-fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10 20;");
 
-        JButton refundBtn = new JButton("Request Refund");
-        refundBtn.setBackground(new Color(231, 76, 60));
-        refundBtn.setForeground(Color.WHITE);
-        refundBtn.setFont(new Font("Arial", Font.BOLD, 14));
-        refundBtn.setFocusPainted(false);
+        Button clearBtn = new Button("Clear");
+        clearBtn.setStyle("-fx-font-size: 14px; -fx-padding: 10 20;");
 
-        JButton clearBtn = new JButton("Clear");
-        clearBtn.setFont(new Font("Arial", Font.BOLD, 14));
-        clearBtn.setFocusPainted(false);
+        HBox buttons = new HBox(15, payBtn, refundBtn, clearBtn);
+        buttons.setAlignment(Pos.CENTER);
+        buttons.setPadding(new Insets(10, 0, 10, 0));
 
-        buttons.add(payBtn);
-        buttons.add(refundBtn);
-        buttons.add(clearBtn);
-
-        JTextArea output = new JTextArea(10, 40);
+        // Output area
+        output = new TextArea();
         output.setEditable(false);
-        output.setFont(new Font("Monospaced", Font.PLAIN, 13));
-        output.setBackground(new Color(30, 30, 30));
-        output.setForeground(new Color(0, 255, 100));
-        output.setBorder(new EmptyBorder(10, 10, 10, 10));
-        JScrollPane scroll = new JScrollPane(output);
-        scroll.setBorder(BorderFactory.createTitledBorder("Output"));
+        output.setStyle("-fx-control-inner-background: #1E1E1E; " +
+                "-fx-text-fill: #00FF64; -fx-font-family: Monospaced; -fx-font-size: 13px;");
+        output.setPrefHeight(200);
 
-        JPanel bottom = new JPanel(new BorderLayout());
-        bottom.setBorder(new EmptyBorder(0, 20, 20, 20));
-        bottom.add(buttons, BorderLayout.NORTH);
-        bottom.add(scroll, BorderLayout.CENTER);
-        frame.add(bottom, BorderLayout.SOUTH);
+        TitledPane outputPane = new TitledPane("Output", output);
+        outputPane.setCollapsible(false);
 
-        payBtn.addActionListener(e -> {
+        // Layout
+        VBox root = new VBox(15);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.TOP_CENTER);
+        root.getChildren().addAll(title, grid, buttons, outputPane);
+
+        // Button actions
+        payBtn.setOnAction(e -> {
             try {
                 double amount = Double.parseDouble(amountField.getText());
-                String gateway = (String) gatewayBox.getSelectedItem();
-                String type = (String) typeBox.getSelectedItem();
-                PaymentGateway pg = buildGateway(gateway, accountField.getText());
-                BasicPayment payment = buildPayment(type, pg, discountField.getText());
-                output.append(">> Processing payment with " + gateway + "\n");
-                captureOutput(payment, amount, false, output);
-                output.append("\n");
+                PaymentGateway pg = buildGateway(
+                        gatewayBox.getValue(), accountField.getText());
+                BasicPayment payment = buildPayment(
+                        typeBox.getValue(), pg, discountField.getText());
+                output.appendText(">> Processing payment with "
+                        + gatewayBox.getValue() + "\n");
+                redirectOutput(payment, amount, false);
+                output.appendText("\n");
             } catch (NumberFormatException ex) {
-                output.append("[ERROR] Invalid amount or discount value\n\n");
+                output.appendText("[ERROR] Invalid amount or discount\n\n");
             }
         });
 
-        refundBtn.addActionListener(e -> {
+        refundBtn.setOnAction(e -> {
             try {
                 double amount = Double.parseDouble(amountField.getText());
-                String gateway = (String) gatewayBox.getSelectedItem();
-                String type = (String) typeBox.getSelectedItem();
-                PaymentGateway pg = buildGateway(gateway, accountField.getText());
-                BasicPayment payment = buildPayment(type, pg, discountField.getText());
-                output.append(">> Processing refund with " + gateway + "\n");
-                captureOutput(payment, amount, true, output);
-                output.append("\n");
+                PaymentGateway pg = buildGateway(
+                        gatewayBox.getValue(), accountField.getText());
+                BasicPayment payment = buildPayment(
+                        typeBox.getValue(), pg, discountField.getText());
+                output.appendText(">> Processing refund with "
+                        + gatewayBox.getValue() + "\n");
+                redirectOutput(payment, amount, true);
+                output.appendText("\n");
             } catch (NumberFormatException ex) {
-                output.append("[ERROR] Invalid amount or discount value\n\n");
+                output.appendText("[ERROR] Invalid amount or discount\n\n");
             }
         });
 
-        clearBtn.addActionListener(e -> output.setText(""));
+        clearBtn.setOnAction(e -> output.clear());
 
-        frame.setVisible(true);
+        Scene scene = new Scene(root, 620, 680);
+        stage.setScene(scene);
+        stage.show();
     }
 
-    static PaymentGateway buildGateway(String gateway, String account) {
-        if (gateway.equals("PayPal")) {
-            return new PayPalAdapter(account);
-        }
+    PaymentGateway buildGateway(String gateway, String account) {
+        if (gateway.equals("PayPal")) return new PayPalAdapter(account);
         return new StripeAdapter();
     }
 
-    static BasicPayment buildPayment(String type, PaymentGateway pg, String discountText) {
+    BasicPayment buildPayment(String type, PaymentGateway pg, String discountText) {
         if (type.equals("With Discount")) {
             double discount = Double.parseDouble(discountText) / 100.0;
             return new DiscountPayment(pg, discount);
@@ -175,16 +169,15 @@ public class Main {
         return new DiscountPayment(pg, 0.0);
     }
 
-    static void captureOutput(BasicPayment payment, double amount,
-                               boolean isRefund, JTextArea output) {
-        PrintStreamCapture capture = new PrintStreamCapture(output);
+    void redirectOutput(BasicPayment payment, double amount, boolean isRefund) {
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        java.io.PrintStream ps = new java.io.PrintStream(baos);
         java.io.PrintStream old = System.out;
-        System.setOut(capture);
-        if (isRefund) {
-            payment.requestRefund(amount);
-        } else {
-            payment.makePayment(amount);
-        }
+        System.setOut(ps);
+        if (isRefund) payment.requestRefund(amount);
+        else payment.makePayment(amount);
+        System.out.flush();
         System.setOut(old);
+        output.appendText(baos.toString());
     }
 }
